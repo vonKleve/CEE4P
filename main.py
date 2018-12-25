@@ -136,11 +136,12 @@ def rename_class():
 
         path = get_path(context)
 
-        # 1 - rename ref in parent
+        # 1 - rename refs in parent
         for parent in context.getElementsByTagName('parent'):
             parent_path = parent.getAttribute('name')
-            parent_node = get_up_element(parent_path.split('.')[0])
-            parent_node = get_element(''.join(parent_path.split('.')[1:]), parent_node)
+            parent_node = get_up_element(parent_path.split('.')[0], 'class')
+            if len(parent_path.split('.')) > 1:
+                parent_node = get_element(''.join(parent_path.split('.')[1:]), parent_node)
 
             ref = None
             for el in parent_node.getElementsByTagName('reference'):
@@ -195,20 +196,21 @@ def delete_class():
 
             for parent in context.getElementsByTagName('parent'):
                 parent_path = parent.getAttribute('name')
-                parent_node = get_up_element(parent_path.split('.')[0])
-                parent_node = get_element(''.join(parent_path.split('.')[1:]), parent_node)
+                parent_node = get_up_element(parent_path.split('.')[0], 'class')
+                if len(parent_path.split('.')) > 1:
+                    parent_node = get_element(''.join(parent_path.split('.')[1:]), parent_node, 'class')
 
-                ref = None
-                for el in parent_node.getElementsByTagName('reference'):
-                    if el.getAttribute('name') == path:
-                        ref = el
-                        break
-
-                if not ref:
-                    print('Oups something went wrong! No ref in parent')
+                if not parent_node:
+                    print('Parent not found, error')
                     return
 
-                parent.removeChild(ref)
+                path = get_path(child)
+
+                # remove all refs from parent
+                for el in parent_node.getElementsByTagName('reference'):
+                    if el.getAttribute('name') == path:
+                        el.parentNode.removeChild(el)
+                        break
 
             context.removeChild(child)
             print('Removed')
@@ -391,6 +393,15 @@ def del_attr(attr):
 
 # ------------------------------------------------------------------------------------------------
 
+def add_docs(txt: str, node):
+    if not (isinstance(node, dom.minidom.Element) and node.tagName == 'class' or node.tagName == 'function'):
+        return
+
+    node.setAttribute('docs', txt)
+
+
+# ------------------------------------------------------------------------------------------------
+
 def on_create():
     cmd = input('class/func/attr\n')
     if cmd == 'class':
@@ -516,11 +527,15 @@ def gen_code():
             for func in get_elements_by_tag_name(node, 'function'):
                 empty = False
                 txt = (func.getAttribute('text') if func.getAttribute('text') != '' else 'pass')
+                cmnts = func.getAttribute('docs')
+                if cmnts != '':
+                    cmnts = form_indent(indent + 1) + '\"\"\"' + cmnts + '\"\"\"' + '\n'
+
                 if '!' in txt:
                     txt = txt.replace('!', '\n' + form_indent(indent + 1))
                 formed = '\n' + form_indent(indent) + 'def ' + func.getAttribute('name') + func.getAttribute(
                     'signature') + \
-                         ':' + '\n' + form_indent(indent + 1) + txt + '\n'
+                         ':' + '\n' + cmnts + form_indent(indent + 1) + txt + '\n'
 
                 lines.append(formed)
                 fout.write(formed)
@@ -528,10 +543,15 @@ def gen_code():
             for cls in get_elements_by_tag_name(node, 'class'):
                 empty = False
                 parents = ','.join([el.getAttribute('name') for el in cls.getElementsByTagName('parent')])
+                cmnts = cls.getAttribute('docs')
+                if cmnts != '':
+                    cmnts = form_indent(indent + 1) + '\"\"\"' + cmnts + '\"\"\"' + '\n'
+
                 if parents != '':
                     parents = '(' + parents + ')'
 
-                formed = '\n\n' + form_indent(indent) + 'class ' + cls.getAttribute('name') + parents + ':' + '\n'
+                formed = '\n\n' + form_indent(indent) + 'class ' + cls.getAttribute('name') + parents + ':' + '\n' \
+                         + cmnts
 
                 lines.append(formed)
                 fout.write(formed)
@@ -564,7 +584,7 @@ def main():
             print(
                 '? - help\n save - save\n exit - exit\n crt - create\n goto - goto context \n rnm - rename\n '
                 'del - delete\n import - import module\n namespace \n names \n gen - generate py module \n'
-                'docs - generate documentation')
+                'docs - generate documentation\n subdoc - add doc for curr context\n')
         elif cmd == 'crt':
             on_create()
         elif cmd == 'rnm':
@@ -586,6 +606,9 @@ def main():
             print(help(module_obj))
         elif cmd == 'gen':
             gen_code()
+        elif cmd == 'subdoc':
+            txt = input('enter docstring\n')
+            add_docs(txt, context)
         elif cmd == 'docs':
             with open('docs.txt', 'w') as fout:
                 sys.stdout = fout
