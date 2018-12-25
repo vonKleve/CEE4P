@@ -1,6 +1,0 @@
-<?xml version="1.0" ?><data>
-<class docs="This is example docstring" name="Amalgalma">
-    <function name="test_func" signature="(self,a)">
-    <reference name="ClassB"/></function>
-<reference name="ClassB"/></class>
-<class name="ClassB"><parent name="Amalgalma"/><function name="test_func" signature="(self,a)" text="mdict = locals() !del mdict['self'] !del mdict['__class__'] !super(ClassB, self).test_func(**locals())"/><class name="TrololoClass"/></class></data>
