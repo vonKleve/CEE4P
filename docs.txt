@@ -1,0 +1,63 @@
+Help on module test:
+
+NAME
+    test
+
+CLASSES
+    builtins.object
+        Amalgalma
+            ClassB
+    
+    class Amalgalma(builtins.object)
+     |  Some example commemt
+     |  
+     |  Methods defined here:
+     |  
+     |  test_func(self, a)
+     |      Some example comment for function.
+     |      :param a:
+     |      :return:
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+    
+    class ClassB(Amalgalma)
+     |  Some example commemt
+     |  
+     |  Method resolution order:
+     |      ClassB
+     |      Amalgalma
+     |      builtins.object
+     |  
+     |  Methods defined here:
+     |  
+     |  test_func(self, a)
+     |      Some example comment for function.
+     |      :param a:
+     |      :return:
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |  
+     |  TrololoClass = <class 'test.ClassB.TrololoClass'>
+     |  
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from Amalgalma:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+
+FILE
+    c:\users\dell\desktop\lab\labtry\test.py
+
+
